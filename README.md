@@ -62,7 +62,7 @@ Standalone game API notes and catalogs. Start with the topic groups below; every
 | Document | Contents |
 |---|---|
 | [Level and biome transitions](04%20-%20Travel%20and%20map/level%20biome%20transitions.md) | Level/entrance assets, BiomeTransitor, loading readiness, and placement lifecycle. |
-| [Mirror travel](04%20-%20Travel%20and%20map/mirror%20travel.md) | First Death travel lock, destination-used flags, destination mapping, and mirror catalog. |
+| [Mirror travel](04%20-%20Travel%20and%20map/mirror%20travel.md) | GPE_Mirror eligibility, per-mirror Death conditions, destination-used flags, and mirror catalog. |
 | [Teleportation and custom spawn placement](04%20-%20Travel%20and%20map/teleportation.md) | Coordinate movement and forced spawn placement, separate from selecting mirror destinations. |
 | [Map interaction](04%20-%20Travel%20and%20map/map%20interaction.md) | Map context, save-point hover, marker matching, and map-cursor movement. |
 | [Room and map completion](04%20-%20Travel%20and%20map/room%20map%20completion.md) | Completion categories, counter behavior, and known item/progression mismatches; exact aggregation is unconfirmed. |
@@ -113,5 +113,6 @@ README.md
 06 - Catalogs/
   room district catalog/
 ```
+
 
 

@@ -131,7 +131,8 @@ Starting a transition is distinct from unlocking a destination, changing story f
 
 `saveBiomeTransitionForRetry` is an available transitor field. The example sets it to `false`; do not infer complete save/retry behavior from this field alone. Check persistence and death/retry behavior separately when implementing a travel feature.
 
-Mirror-specific destination-used flags, the first Death travel lock, and destination mappings are documented in [mirror travel.md](mirror%20travel.md).
+Mirror-specific destination-used flags, per-mirror eligibility conditions, and destination mappings are documented in [mirror travel.md](mirror%20travel.md).
+
 
 
 

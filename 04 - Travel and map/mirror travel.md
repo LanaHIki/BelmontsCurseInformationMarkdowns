@@ -9,8 +9,9 @@ This document covers mirror-specific access and destinations. General asset reso
 ## Mirror travel flow
 
 ```text
-Check first Death progression key
-→ read used-mirror progression flags
+Identify the physical GPE_Mirror
+→ evaluate its CanUseMirror(playerEntity) result
+→ respect its configured conditions and destination-used flags
 → choose an eligible mirror
 → resolve its destination level and entrance
 → use the level/biome transition system
@@ -37,27 +38,121 @@ Alternatively, resolve the key asset and use `HasProgressionKey(key)`. A missing
 
 Unlock state and the act of launching a transition are separate: a custom travel interface should explicitly enforce its intended unlock policy.
 
-## Travel lock: first Death progression key
+## Physical mirrors: GPE_Mirror
 
-Mirror travel is gated by the first Death/The Shadow confrontation progression key, not by meeting Eleanor.
+`GPE_Mirror` represents a physical mirror object. `CanUseMirror(Entity player)` returns whether that player may use that particular mirror at the time of the call. It is a method, not a writable boolean attribute.
 
-- Key: `DeathCatacombs_Defeated_ID`
+| Member | Runtime type / role |
+|---|---|
+| `CanUseMirror(Entity)` | Boolean eligibility query for this mirror/player |
+| `IsATeleportMirror` | Boolean property identifying teleport mirrors |
+| `mirrorType` | `MirrorType`; tested travel objects reported `BaseMirror` |
+| `useMirrorCondition` | `EntityConditionAbstract`; configured eligibility condition |
+| `isABiomeTransition` | Boolean indicating biome-transition configuration |
+| `biomeTransitor` | `BiomeTransitor` reference |
+| `zDoorEntrance` | `ZDoorEntrance` reference |
+| `OnPlayerInteract(Entity)` | Player-interaction entry point; not a promise to bypass prerequisites |
+| `GetMirrorEntity()` | Mirror's associated entity |
+| `transform.position` | Mirror world-space position |
+| `gameObject.scene.name` | Owning scene |
+
+Other exposed presentation properties include `shadeMirrorDirection`, `mirrorShadeTypeId`, `reflectLayer`, `baseReflectLayers`, and `planarReflectionRenderer`. These concern mirror direction/reflection presentation; they are not established unlock switches.
+
+Tested physical objects were named `GPE_MirrorBase` and reported `teleport=True`, `biomeTransition=True`, and `useMirrorCondition` type `EntityConditionCheckProgressKey`. The same condition type does not mean every mirror requires the same key.
+
+## Per-mirror conditions: Death is not a universal lock
+
+The first Death/The Shadow confrontation key is:
+
+- Name: `DeathCatacombs_Defeated_ID`
 - GUID: `769b38ad62fa14249b54a74ef889998c`
-- Event: first confrontation with Death/The Shadow at the Altar of Bones.
 
-This global travel lock is separate from `MC_Used_SaveRoom_*`, which records whether an individual destination mirror has been used.
+Some tested mirrors require it, while others remain usable when it is absent. The earlier statement that all mirror travel is globally locked by this flag was too broad. Eleanor is also not a universal mirror-travel prerequisite.
 
-```text
-First Death progression key present
-+ destination mirror's used-save-room key present
-→ mirror travel is eligible under these progression prerequisites
+| Tested mirror/context | Observed progression checks | Death flag absent |
+|---|---|---|
+| Ancient Sewers, Cemetery | First Death key plus a used-mirror key | `CanUseMirror` returned false; returned true after Death was enabled |
+| Boudoirs, Main Hall | Used-mirror key | Returned true |
+| Master's Quarters | Used-mirror key | Returned true |
+| Tested Hall of Mirrors exits | Used-mirror key for the corresponding destination | Returned true |
+
+These are observed cases, not an exhaustive eligibility table for every mirror. The absence of a logged key query alone cannot exclude an unobserved/inlined check. The positive eligibility results with Death absent do demonstrate that Death is not universally required.
+
+Concrete observed examples:
+
+| Scene / mirror position | Result with Death absent | Used key observed |
+|---|---|---|
+| `MainHall_SaveRoom_030_uid221`, `(419.13, 28.00)` | true | `MC_Used_SaveRoom_06MainHall_04`, GUID `8724ec587f61c09458ce03fc2ac9c435` |
+| `HallOfMirrors_MVP_Room_41_uid145`, `(135.62, 279.06)` | true | Same Main Hall destination-used key |
+| `HallOfMirrors_MVP_Room_41_uid145`, `(127.63, 277.06)` | true | `MC_Used_SaveRoom_06MainHall_01`, GUID `dac851a2229a18241aea2f84fe804cc0` |
+
+Do not replace the game's eligibility query with a hardcoded `Death && usedMirror` formula. Read the result of the particular physical mirror and retain its configured behavior.
+
+## Example: read a mirror's eligibility and configuration
+
+```csharp
+static bool CanUsePhysicalMirror(GPE_Mirror mirror,
+    MotherBase.EntityFramework.Entity playerEntity)
+{
+    if (mirror == null || playerEntity == null) return false;
+    if (!mirror.IsATeleportMirror) return false;
+
+    bool allowed = mirror.CanUseMirror(playerEntity);
+    var condition = mirror.useMirrorCondition;
+    string conditionType = condition == null
+        ? "none" : condition.GetIl2CppType().Name;
+
+    UnityEngine.Debug.Log($"Mirror: {mirror.name}; "
+        + $"scene={mirror.gameObject.scene.name}; "
+        + $"type={mirror.mirrorType}; "
+        + $"biomeTransition={mirror.isABiomeTransition}; "
+        + $"condition={conditionType}; allowed={allowed}");
+    return allowed;
+}
 ```
 
-Gameplay readiness and destination validity must still be checked before launching a transition. These prerequisites are distinct from entering and unsealing other Hall of Mirrors content.
+Use a valid active player entity and run game calls on Unity's main thread. This is illustrative code; the runtime observations above came from observing calls initiated by the game. Do not repeatedly reevaluate a condition unnecessarily or assume arbitrary condition evaluation has no side effects.
 
-`MC_CharacterDataModificator_Eleanor` (`6e518ea36b23065439b86276732c7471`) is a separate character progression key. It must not be used as the mirror-travel lock. The earlier attribution of travel access to Eleanor was incorrect.
+## Adding an extra physical-mirror lock
 
-A direct `BiomeTransitor.StartBiomeTransition(playerEntity)` call does not itself enforce a custom travel interface's eligibility rules. Check the first Death key and destination-used flag explicitly when following normal mirror-travel restrictions. Calling a transition does not grant either flag.
+A Harmony postfix can restrict a mirror while preserving its original requirements:
+
+```csharp
+using HarmonyLib;
+
+[HarmonyPatch(typeof(GPE_Mirror), nameof(GPE_Mirror.CanUseMirror))]
+static class ExtraMirrorLock
+{
+    [HarmonyPostfix]
+    static void AfterCanUse(GPE_Mirror __instance, ref bool __result)
+    {
+        if (!__result || __instance == null || !__instance.IsATeleportMirror)
+            return;
+
+        // Application-defined room or individual-mirror lock policy.
+        if (IsExtraLocked(__instance))
+            __result = false;
+    }
+}
+```
+
+`IsExtraLocked` is application-owned policy, not a game method. Conceptually, `result = originalResult && !extraLocked`. Removing the added lock restores the original result; it must not force true and bypass unmet native conditions.
+
+For room-based selection, obtain the player's `CurrentRoomInstance` from its entity, read `currentRoom.gameObject.scene.name`, and select active `GPE_Mirror` instances whose scene matches and whose `IsATeleportMirror` is true. A tested selection in `HallOfMirrors_MVP_Room_41_uid145` contained 30 teleport mirrors, so a room-wide lock can affect many destinations. Use an individual instance/position identifier if finer control is required.
+
+An extra room-lock hook was built and installed, and lock/unlock toggles were logged. Full in-game travel blocking and independent saving/healing under that hook had not yet been confirmed in the recorded test. A temporary in-memory lock is not a progression-key change; clear it on the intended lifecycle boundary.
+
+## Travel versus saving and map selection
+
+Saving uses the separate `SavePoint` path, including `UseSavePoint(EntityVariable)` and `UseSavePoint(Entity)`, with separate linking/healing operations. A postfix that changes only `GPE_Mirror.CanUseMirror` does not directly patch those APIs. Whether all saving/healing behavior remains unchanged under a specific lock still needs to be treated as unconfirmed until tested; the API separation alone is not proof.
+
+Map interaction has its own methods:
+
+- `LevelMapSavePointItem.HasUsedSavePoint()`
+- `LevelMapSavePointItem.IsSelectableInternal()`
+- `LevelMapHoverableStrategySavePoint.IsInteractable()`
+
+A lock on a physical mirror's `CanUseMirror` does not automatically cover map-based or manually initiated `BiomeTransitor` travel. Apply the intended policy to each travel entry point. Calling a transition does not itself grant used-mirror or story flags.
 
 ## Destination information
 
@@ -132,6 +227,7 @@ The table below lists destination identifiers and available coordinates. A custo
 | Nightmare Atrium | Hall of Mirrors | 076c637c5bf14f84995d8122d5980e2a | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 252, 184 | Yes |
 | The Descent Into Memory | Hall of Mirrors | 594a83550b6c0e34c9717704f0ef1229 | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 156, 106 | Yes |
 | Heart of the Maze | Hall of Mirrors | f2519f6b210852e49a9d54c031012c66 | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 156, 67 | Yes |
+
 
 
 

@@ -118,7 +118,7 @@ These are candidate mappings, not proof that each scene always grants a clue the
 
 Clue items use normal inventory state. Confirm retention with normal save/reload and recheck ownership on the restored player inventory. An external observation log does not mean the clue is present in the current save.
 
-A clue item and its named character's progression keys are different identifiers. In particular, `Clue_Eleanor_KneelDown` describes kneeling, but does not establish travel eligibility. The mirror-travel lock is the first Death key, `DeathCatacombs_Defeated_ID`, separate from Eleanor character state. Do not treat clue ownership as proof that an ability or interaction is unlocked.
+A clue item and its named character's progression keys are different identifiers. In particular, `Clue_Eleanor_KneelDown` describes kneeling, but does not establish travel eligibility. Some mirrors require the first Death key, `DeathCatacombs_Defeated_ID`, while others are usable without it. Per-mirror eligibility is separate from Eleanor character state. Do not treat clue ownership as proof that an ability or interaction is unlocked.
 
 ## Clue catalog and room candidates
 
@@ -166,6 +166,7 @@ The following 40 entries provide clue labels, internal item IDs, and available c
 | Notre-Dame - The Judge (Saint Louis) Clue: Balancing the Scales of Justice | Clue_SaintLouis_ScaleText | Unknown |
 | Notre-Dame - The Self (Doppelganger) Clue: The First Card | Clue_Doppelganger_FirstCard | Unknown |
 | Notre-Dame - The Self (Doppelganger) Clue: The Prophecy | Clue_Doppelganger_Prophecy | Unknown |
+
 
 
 

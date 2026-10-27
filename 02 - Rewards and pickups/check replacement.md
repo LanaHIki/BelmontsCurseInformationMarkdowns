@@ -167,7 +167,7 @@ Keys are `ProgressionKeyID` assets. Some event paths may update progression with
 
 - Key: `MC_CharacterDataModificator_Eleanor`
 - GUID: `6e518ea36b23065439b86276732c7471`
-- This is an Eleanor character key, not the mirror-travel lock. Mirror travel is gated by the first Death key.
+- This is an Eleanor character key, not the mirror-travel lock. Some mirrors require the first Death key; other tested mirrors are usable without it.
 
 Observe the key setter to identify this character-state change. Do not interpret it as the mirror-travel unlock.
 
@@ -517,6 +517,7 @@ static void PollShadowFlag(ProgressionComponent progression,
 `ObserveFlagSnapshot` is application-owned state tracking. On initialization/load, establish the baseline without treating restored presence as a newly completed fight. Polling can detect changes that bypass the observed setter, but flag changes alone do not identify why the change happened. Pair with room/encounter context.
 
 If deliberately withholding this key, `UnsetProgressionKey(shadowKey)` removes it. Its route-opening and encounter-suppression effects make removal or early assignment consequential; consult [progression flags.md](../03%20-%20Progression%20and%20cutscenes/progression%20flags.md) before changing it.
+
 
 
 
