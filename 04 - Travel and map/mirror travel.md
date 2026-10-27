@@ -9,7 +9,8 @@ This document covers mirror-specific access and destinations. General asset reso
 ## Mirror travel flow
 
 ```text
-Read used-mirror progression flags
+Check first Death progression key
+→ read used-mirror progression flags
 → choose an eligible mirror
 → resolve its destination level and entrance
 → use the level/biome transition system
@@ -36,24 +37,27 @@ Alternatively, resolve the key asset and use `HasProgressionKey(key)`. A missing
 
 Unlock state and the act of launching a transition are separate: a custom travel interface should explicitly enforce its intended unlock policy.
 
-## Eleanor and access requirements
+## Travel lock: first Death progression key
 
-Meeting Eleanor (The Sage) unlocks kneeling at save mirrors to enter the Hall of Mirrors through the normal gameplay route. This is represented by:
+Mirror travel is gated by the first Death/The Shadow confrontation progression key, not by meeting Eleanor.
 
-- Progression key: `MC_CharacterDataModificator_Eleanor`
-- Key GUID: `6e518ea36b23065439b86276732c7471`
+- Key: `DeathCatacombs_Defeated_ID`
+- GUID: `769b38ad62fa14249b54a74ef889998c`
+- Event: first confrontation with Death/The Shadow at the Altar of Bones.
 
-This kneeling unlock is separate from the `MC_Used_SaveRoom_*` flags recording which destination mirrors have been used.
+This global travel lock is separate from `MC_Used_SaveRoom_*`, which records whether an individual destination mirror has been used.
 
-Direct travel through `BiomeTransitor.StartBiomeTransition(playerEntity)` can target a mirror's level and entrance without first invoking the kneeling mechanic. The direct travel flow described here does not require an explicit Eleanor-key check. It should not be taken as proof that every internal transition path is independent of all story state.
+```text
+First Death progression key present
++ destination mirror's used-save-room key present
+→ mirror travel is eligible under these progression prerequisites
+```
 
-| Action | Eleanor requirement |
-|---|---|
-| Kneel at a save mirror through normal gameplay | Requires her kneeling-unlock progression key |
-| Identify previously used destination mirrors | Read each mirror's used-save-room flag; this is separate from Eleanor's key |
-| Start the direct level/entrance transition described here | No explicit Eleanor-key prerequisite in this flow |
+Gameplay readiness and destination validity must still be checked before launching a transition. These prerequisites are distinct from entering and unsealing other Hall of Mirrors content.
 
-Calling a transition does not grant Eleanor's unlock or mark the destination mirror as used. Enforce those prerequisites separately if a custom travel interface should follow normal gameplay restrictions.
+`MC_CharacterDataModificator_Eleanor` (`6e518ea36b23065439b86276732c7471`) is a separate character progression key. It must not be used as the mirror-travel lock. The earlier attribution of travel access to Eleanor was incorrect.
+
+A direct `BiomeTransitor.StartBiomeTransition(playerEntity)` call does not itself enforce a custom travel interface's eligibility rules. Check the first Death key and destination-used flag explicitly when following normal mirror-travel restrictions. Calling a transition does not grant either flag.
 
 ## Destination information
 
@@ -128,6 +132,7 @@ The table below lists destination identifiers and available coordinates. A custo
 | Nightmare Atrium | Hall of Mirrors | 076c637c5bf14f84995d8122d5980e2a | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 252, 184 | Yes |
 | The Descent Into Memory | Hall of Mirrors | 594a83550b6c0e34c9717704f0ef1229 | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 156, 106 | Yes |
 | Heart of the Maze | Hall of Mirrors | f2519f6b210852e49a9d54c031012c66 | b76c5d815e88a8442ad46b1c869efd5f | 117e85d816d7eba49a5fc3ccab86f406 | 156, 67 | Yes |
+
 
 
 

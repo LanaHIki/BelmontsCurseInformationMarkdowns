@@ -278,7 +278,7 @@ The following game functions are not additional item asset records in the tables
 | Attack Book | `PowerAttackBonus` |
 | Defense Book | `PowerDefenseBonus` |
 | XP | `ExperienceComponent.IncrementCurrentExperience` |
-| Kneeling at mirrors | `MC_CharacterDataModificator_Eleanor`, GUID `6e518ea36b23065439b86276732c7471` |
+| Mirror-travel lock | First Death key `DeathCatacombs_Defeated_ID`, GUID `769b38ad62fa14249b54a74ef889998c` |
 | First Shadow confrontation / castle route flag | `DeathCatacombs_Defeated_ID`, GUID `769b38ad62fa14249b54a74ef889998c` |
 
 Do not pass invented item IDs such as a stat class name into `FindItem` and assume they represent inventory assets. Movement abilities do have real item assets, but their explicit runtime unlock state is exposed through `VaniaMovesComponent`.
@@ -290,6 +290,7 @@ Do not pass invented item IDs such as a stat class name into `FindItem` and assu
 - [books and fragments.md](../02%20-%20Rewards%20and%20pickups/books%20and%20fragments.md): stat pickup APIs and source identifiers.
 - [progression flags.md](../03%20-%20Progression%20and%20cutscenes/progression%20flags.md): story flags, character steps, and the Catacombs gem gate.
 - [experience granting.md](../01%20-%20Items%20and%20abilities/experience%20granting.md): XP increment API.
+
 
 
 

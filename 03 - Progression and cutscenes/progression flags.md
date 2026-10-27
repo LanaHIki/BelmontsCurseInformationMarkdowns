@@ -108,17 +108,17 @@ If observing both setters and polling, deduplicate events. If an observer itself
 
 | Purpose | Asset name or family | GUID / effect |
 |---|---|---|
-| Mirror kneeling | `MC_CharacterDataModificator_Eleanor` | `6e518ea36b23065439b86276732c7471`; unlocks kneeling at save mirrors to enter the Hall of Mirrors |
-| First Shadow confrontation | `DeathCatacombs_Defeated_ID` | `769b38ad62fa14249b54a74ef889998c`; opens the east Streets route and changes confrontation-area state |
+| Eleanor character key | `MC_CharacterDataModificator_Eleanor` | `6e518ea36b23065439b86276732c7471`; separate from the mirror-travel lock |
+| First Shadow confrontation | `DeathCatacombs_Defeated_ID` | `769b38ad62fa14249b54a74ef889998c`; gates mirror travel, opens the east Streets route, and changes confrontation-area state |
 | Clock Tower Death Trap | `MC_Progression_DeathTrapDisarmed_ID` | `10f68e1e54b7d98498cd7ef384ba6e47`; represents disarming the trap associated with the normal/true-ending route |
 | Joan defeated | Boss-defeat key | `641325fec3360bb459c879275fdee639`; relevant to Joan's Catacombs gem slot |
 | Medusa defeated | `Medusa_Defeated_ID` | `ac985fb3574b3cc4eadaf3a79793112e`; relevant to Medusa's Catacombs gem slot |
-| Used save mirrors | `MC_Used_SaveRoom_*` | Individual mirror keys; distinct from Eleanor's unlock |
+| Used save mirrors | `MC_Used_SaveRoom_*` | Individual destination keys; separate from the global first Death travel lock |
 | Character name/title reveal | `MC_CharacterDataModificator_*` | Reveals character identity; some keys also unlock functionality |
 
 ### Eleanor
 
-The Eleanor key controls kneeling, while each used-mirror key records a destination mirror. Directly launching a level transition does not itself grant either type of key. Detailed access and destination mappings are in [mirror travel.md](../04%20-%20Travel%20and%20map/mirror%20travel.md).
+The Eleanor key is not the mirror-travel lock. Mirror travel uses the first Death key (`DeathCatacombs_Defeated_ID`), while each used-mirror key records an individual destination. Directly launching a level transition does not itself grant those prerequisites. Detailed access and destination mappings are in [mirror travel.md](../04%20-%20Travel%20and%20map/mirror%20travel.md).
 
 ### First Shadow confrontation
 
@@ -153,7 +153,7 @@ The following suffixes belong to the `MC_CharacterDataModificator_` asset-name f
 
 For example, `MC_CharacterDataModificator_Leon` and `MC_CharacterDataModificator_TheFallen` provide name/title identity. Introductory cutscenes can set identity flags; skipping those sequences can leave names displayed as `???` unless their intended flag changes occur separately.
 
-Do not treat the entire family as cosmetic: Eleanor's key also grants a movement interaction.
+Do not infer the mirror-travel lock from the Eleanor character key; use the first Death progression key.
 
 ## Character progression steps are separate
 
@@ -273,6 +273,7 @@ Capture original presence and related character step
 Do not remove a key the player already legitimately owned. Account for genuine progression occurring while an override is active, and avoid rolling it back. Cleanup should also consider interrupted loads, deaths, and restarts.
 
 Runtime changes participate in game state but do not prove an immediate disk save. Verify through the normal save/load cycle and reacquire components before comparing restored flags. An external record of a flag is separate from the game save.
+
 
 
 

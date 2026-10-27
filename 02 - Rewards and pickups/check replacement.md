@@ -163,13 +163,13 @@ progression.UnsetProgressionKey(key);
 
 Keys are `ProgressionKeyID` assets. Some event paths may update progression without passing through the setter being observed, so polling state can be necessary.
 
-### The Sage: kneeling at mirrors
+### Eleanor character event
 
 - Key: `MC_CharacterDataModificator_Eleanor`
 - GUID: `6e518ea36b23065439b86276732c7471`
-- Effect: unlocks kneeling at save mirrors to enter the Hall of Mirrors.
+- This is an Eleanor character key, not the mirror-travel lock. Mirror travel is gated by the first Death key.
 
-Observe the key being set to detect the unlock event. Withholding or granting this key controls the unlock independently of an inventory item.
+Observe the key setter to identify this character-state change. Do not interpret it as the mirror-travel unlock.
 
 ### First Shadow confrontation
 
@@ -478,7 +478,7 @@ static class ClueObserver
 
 This observes an attempted clue grant; confirm resulting ownership if successful acquisition is required. Deduplicate replayed grants and coordinate this observer with any inventory gate so clues are not accidentally blocked. Other clues can be recognized by their exact IDs from [clues.md](clues.md).
 
-### Progression events: intercept the Sage's unlock
+### Progression events: intercept an Eleanor character key
 
 ```csharp
 [HarmonyPatch(typeof(ProgressionComponent),
@@ -492,13 +492,13 @@ static class SageUnlockGate
         if (progressionKey.guid != "6e518ea36b23065439b86276732c7471")
             return true;
 
-        RecordCollection("sage-kneeling-event");
-        return allowKneelingUnlock;
+        RecordCollection("eleanor-character-event");
+        return allowEleanorKey;
     }
 }
 ```
 
-`deliberateKeyChange` and `allowKneelingUnlock` are application policy state. Returning `false` withholds the Eleanor key while allowing it separately later through `SetProgressionKey`. Guard deliberate changes against recursive observation. This hook sees attempts to set the key, not proof the player has just met Eleanor for the first time.
+`deliberateKeyChange` and `allowEleanorKey` are application policy state. This example intercepts the Eleanor key; it does not implement the mirror-travel lock. Returning `false` withholds the Eleanor key while allowing it separately later through `SetProgressionKey`. Guard deliberate changes against recursive observation. This hook sees attempts to set the key, not proof the player has just met Eleanor for the first time.
 
 ### Progression events: observe the Shadow flag by polling
 
@@ -517,5 +517,6 @@ static void PollShadowFlag(ProgressionComponent progression,
 `ObserveFlagSnapshot` is application-owned state tracking. On initialization/load, establish the baseline without treating restored presence as a newly completed fight. Polling can detect changes that bypass the observed setter, but flag changes alone do not identify why the change happened. Pair with room/encounter context.
 
 If deliberately withholding this key, `UnsetProgressionKey(shadowKey)` removes it. Its route-opening and encounter-suppression effects make removal or early assignment consequential; consult [progression flags.md](../03%20-%20Progression%20and%20cutscenes/progression%20flags.md) before changing it.
+
 
 

@@ -122,7 +122,7 @@ The destination fields are application-owned catalog data, not fields guaranteed
 
 A district match is not a guaranteed unique marker identity. If several mirrors occupy the same district, use additional marker/position information and report ambiguity rather than selecting the first candidate blindly.
 
-Mirror eligibility is separate: check the player's matching `MC_Used_SaveRoom_*` progression key. Eleanor's kneeling unlock is another separate flag. See [mirror travel.md](mirror%20travel.md) and [progression flags.md](../03%20-%20Progression%20and%20cutscenes/progression%20flags.md).
+Mirror eligibility requires the first Death progression key (`DeathCatacombs_Defeated_ID`) and the matching destination `MC_Used_SaveRoom_*` flag. Eleanor is not the travel lock. See [mirror travel.md](mirror%20travel.md) and [progression flags.md](../03%20-%20Progression%20and%20cutscenes/progression%20flags.md).
 
 ## Positional fallback
 
@@ -219,5 +219,6 @@ This is a candidate location observation, not an automatic authoritative coordin
 The runtime APIs above support map-context inspection, save-point hover observation, marker enumeration, and cursor movement. They do not establish a universal open/close-map command, arbitrary zoom/level navigation, every map-marker type, or exact screen-to-world coordinate conversion for every view.
 
 Map completion percentages and room-color logic are separate systems documented in [room map completion.md](room%20map%20completion.md).
+
 
 
