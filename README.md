@@ -3,6 +3,8 @@ So this repo was made to document information from a vibe coded version of Castl
 
 None of this information should be regraded as the truth. Like seriously shit might just be hallucinated etc. The only reason this was made was to be leads towards better things. Things to investigate and look at while finding the truth for implementation by humans. None of this was verified directly. Especially not the code(it's all illustrative please just don't copy paste it)
 
+Like seriously it's vibe coded claude into codex summary of the code with no context.
+
 I hope it helps a little with speeding up development.
 (and hopefully not slow things down)
 
